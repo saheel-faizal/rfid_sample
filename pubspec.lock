@@ -400,6 +400,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.0"
+  rfid_c72_plugin:
+    dependency: "direct main"
+    description:
+      name: rfid_c72_plugin
+      sha256: "8a81542ffa5ce65d6e36d6383fc913febec9551120cfd07bc888897e631d9234"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2"
   rxdart:
     dependency: transitive
     description:
@@ -501,14 +509,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.5.0"
-  zebra_rfid_sdk_plugin:
-    dependency: "direct main"
-    description:
-      name: zebra_rfid_sdk_plugin
-      sha256: e7787557be26488a9c092c8452ee5ef07110fe2eee59c28a116180086eafe6a2
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.3"
 sdks:
   dart: ">=3.6.1 <4.0.0"
   flutter: ">=3.27.0"

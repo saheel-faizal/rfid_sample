@@ -1,20 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:rfid_c72_plugin/rfid_c72_plugin.dart';
+import 'package:rfid_sample/model/tag_epc.dart';
 import 'package:rfid_sample/service/telegram_logger_service.dart';
 import 'package:rfid_sample/utils/app_alerts.dart';
-import 'package:zebra_rfid_sdk_plugin/zebra_event_handler.dart';
-import 'package:zebra_rfid_sdk_plugin/zebra_rfid_sdk_plugin.dart';
-// import 'package:zebra_rfid_sdk_plugin/zebra_event_handler.dart';
-// import 'package:zebra_rfid_sdk_plugin/zebra_rfid_sdk_plugin.dart';
 
 import '../utils/config.dart';
 
 class BaseProvider extends ChangeNotifier {
   bool isDataLoading = false;
-  // TicketResponse? ticketResponse;
-  // Scanwedge? scanwedge;
-
   bool _isScannerActive = false; // Track scanner state
-  bool _scanCooldown = false; // Prevent multiple quick scans
 
   String scannedTag = "";
 
@@ -85,72 +79,69 @@ class BaseProvider extends ChangeNotifier {
   }
 
   Set<String> scannedEpcSet = {}; // Store unique scanned EPCs
-  void initRFIDReader(BuildContext context) {
+  void initRFIDReader(BuildContext context) async {
     double minDistanceThreshold = 10.0; // Set your desired minimum threshold
 
-    ZebraRfidSdkPlugin.setEventHandler(ZebraEngineEventHandler(
-      readRfidCallback: (datas) async {
-        if (datas.isNotEmpty) {
-          var firstScan = datas.first; // Get the first detected tag
-          double? relativeDistance = firstScan.relativeDistance.toDouble(); // Get relative distance if available
-          String scannedEpc = firstScan.tagID; // Extract EPC
+    try {
+      await RfidC72Plugin.connect;
+      TelegramLogger.sendLog("RFIDC72 Reader Initialized");
 
-          TelegramLogger.sendLog("Scan Detected: ${firstScan.toMap()}");
-
-          // Check if EPC has already been processed
-          if (scannedEpcSet.contains(scannedEpc)) {
-            TelegramLogger.sendLog("Duplicate EPC detected, ignoring: $scannedEpc");
-            return; // Skip processing if already scanned
-          }
-
-          // Add EPC to the set to mark it as processed
-          scannedEpcSet.add(scannedEpc);
-
-          if (relativeDistance <= minDistanceThreshold) {
-            _isScannerActive = false; // Stop scanning after first scan
-            await stopRfidScanning(); // Stop scanner
-            AppAlerts.appToast(message: "Scanned EPC: $scannedEpc");
-            TelegramLogger.sendLog("Scanned EPC: $scannedEpc | Passed Distance Check");
-
-            // Call reusable function to validate EPC
-            processEpcData(context, scannedEpc, gateUserType);
-          } else {
-            TelegramLogger.sendLog(
-                "Scanned EPC: ${firstScan.tagID} | Rejected due to low distance: $relativeDistance");
-          }
-        }
-      },
-      errorCallback: (err) {
-        AppAlerts.appToast(message: "RFID ERROR: ${err.errorMessage}");
-        TelegramLogger.sendLog("RFID ERROR: ${err.errorMessage}");
-      },
-      connectionStatusCallback: (status) {
-        TelegramLogger.sendLog("RFID ConnectionStatus: ${status.name}");
-        print(status.name);
-      },
-    ));
+      // Ensure the device is connected before scanning
+      bool isConnected = await RfidC72Plugin.platformVersion != null;
+      if (!isConnected) {
+        TelegramLogger.sendLog("RFIDC72 Reader connection failed");
+      }
+    } catch (e) {
+      TelegramLogger.sendLog("Error initializing RFIDC72 Reader: $e");
+    }
   }
 
   /// **Start Scanning for RFID Tags**
   Future<void> startRfidScanning(BuildContext context) async {
     if (_isScannerActive) return;
+
     initRFIDReader(context);
-    TelegramLogger.sendLog("RFID Scanning Started");
+    TelegramLogger.sendLog("RFIDC72 Scanning Started");
+
     scannedTag = ""; // Reset previous scan
-    await ZebraRfidSdkPlugin.connect();
     _isScannerActive = true;
     notifyListeners();
+
+    RfidC72Plugin.tagsStatusStream.receiveBroadcastStream().listen(
+          (dynamic result) {
+        List<TagEpc> tags = TagEpc.parseTags(result);
+
+        for (var tag in tags) {
+          String scannedTag = tag.epc.replaceAll("EPC:", "").trim();
+
+          if (!scannedEpcSet.contains(scannedTag)) {
+            scannedEpcSet.add(scannedTag);
+            TelegramLogger.sendLog("New RFIDC72 Tag Detected: $scannedTag");
+            AppAlerts.appToast(message: "RFID Tag Scanned: $scannedTag");
+
+            processEpcData(context, scannedTag, gateUserType);
+          } else {
+            TelegramLogger.sendLog("Duplicate RFIDC72 Tag Ignored: $scannedTag");
+          }
+        }
+      },
+      onError: (error) {
+        TelegramLogger.sendLog("Error receiving RFIDC72 scan: $error");
+      },
+    );
+
+    await RfidC72Plugin.startContinuous;
   }
 
   /// **Stop Scanning**
   Future<void> stopRfidScanning() async {
     _isScannerActive = false;
     notifyListeners();
-    TelegramLogger.sendLog("RFID Scanning Stopped");
-    await ZebraRfidSdkPlugin.disconnect();
-    // await ZebraRfidSdkPlugin.dispose();
+    TelegramLogger.sendLog("RFIDC72 Scanning Stopped");
 
+    await RfidC72Plugin.stop;
   }
+
 
   void _showModernDialog(
       BuildContext context, bool result, String message, String subMessage) {

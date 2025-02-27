@@ -36,15 +36,14 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_blue_plus:
   permission_handler:
-  zebra_rfid_sdk_plugin: ^0.0.3
   provider:
   mobile_scanner:
   lottie:
   qr_flutter:
   fluttertoast:
   dio:
+  rfid_c72_plugin:
 
-#  pda_rfid_scanner:
 
 dev_dependencies:
   flutter_test:
