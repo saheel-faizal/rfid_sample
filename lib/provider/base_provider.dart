@@ -80,7 +80,6 @@ class BaseProvider extends ChangeNotifier {
 
   Set<String> scannedEpcSet = {}; // Store unique scanned EPCs
   void initRFIDReader(BuildContext context) async {
-    double minDistanceThreshold = 10.0; // Set your desired minimum threshold
 
     try {
       await RfidC72Plugin.connect;
