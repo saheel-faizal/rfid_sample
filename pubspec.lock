@@ -304,6 +304,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.9.0"
+  pda_rfid_scanner:
+    dependency: "direct main"
+    description:
+      name: pda_rfid_scanner
+      sha256: a417a2368aeb514bd4a1ebcae26cd000c1e8533c821a7da037e40d63679645e1
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.4"
   permission_handler:
     dependency: "direct main"
     description:
@@ -501,14 +509,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.5.0"
-  zebra_rfid_sdk_plugin:
-    dependency: "direct main"
-    description:
-      name: zebra_rfid_sdk_plugin
-      sha256: e7787557be26488a9c092c8452ee5ef07110fe2eee59c28a116180086eafe6a2
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.3"
 sdks:
   dart: ">=3.6.1 <4.0.0"
   flutter: ">=3.27.0"

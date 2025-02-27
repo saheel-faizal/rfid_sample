@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rfid_sample/provider/base_provider.dart';
 import 'package:rfid_sample/utils/config.dart';
-import 'package:rfid_sample/view/gate_user_screen.dart';
+import 'package:rfid_sample/view/pda_rfid_pub.dart';
 
 void main() {
   // configureGateUser("Gate_1");
@@ -14,11 +15,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // ChangeNotifierProvider(create: (_) => BaseProvider()),
+        ChangeNotifierProvider(create: (_) => BaseProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: GateUserHomeScreen(),
+        home: PdaRfidSampleScreen(),
       ),
     );
   }
