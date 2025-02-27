@@ -40,9 +40,6 @@ android {
         }
     }
 }
-dependencies{
-    implementation project(":RFIDAPI3Library",)
-}
 
 flutter {
     source = "../.."
