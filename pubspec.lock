@@ -501,14 +501,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.5.0"
-  zebra123:
+  zebra_rfid_sdk_plugin:
     dependency: "direct main"
     description:
-      name: zebra123
-      sha256: d9050e27088e4a7808e54ff5ed8d3e0929dabed46592f1a686584abff9b920d4
+      name: zebra_rfid_sdk_plugin
+      sha256: e7787557be26488a9c092c8452ee5ef07110fe2eee59c28a116180086eafe6a2
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.0"
+    version: "0.0.3"
 sdks:
   dart: ">=3.6.1 <4.0.0"
   flutter: ">=3.27.0"
