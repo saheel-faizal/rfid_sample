@@ -42,7 +42,6 @@ android {
 }
 dependencies{
     implementation project(":RFIDAPI3Library",)
-    implementation project(":RFIDAPI31Library",)
 }
 
 flutter {

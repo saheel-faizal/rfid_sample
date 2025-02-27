@@ -25,5 +25,3 @@ plugins {
 include ":app"
 include ":app", ':RFIDAPI3Library'
 project(":RFIDAPI3Library").projectDir = file("./RFIDAPI3Library")
-include ":app", ':RFIDAPI31Library'
-project(":RFIDAPI31Library").projectDir = file("./RFIDAPI31Library")

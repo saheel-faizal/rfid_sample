@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:rfid_sample/service/telegram_logger_service.dart';
 import 'package:zebra123/zebra123.dart';
 
 class Zebra123Screen extends StatefulWidget {
@@ -25,14 +26,17 @@ class _Zebra123ScreenState extends State<Zebra123Screen> {
     zebra123 = Zebra123(callback: _callback);
     await zebra123?.connect();
     setState(() => _isScannerActive = true);
+    TelegramLogger.sendLog("Zebra 123 | Scanner Initializing");
   }
 
   Future<void> _stopScanner() async {
     await zebra123?.disconnect();
     setState(() => _isScannerActive = false);
+    TelegramLogger.sendLog("Zebra 123 | Scanner Stopped");
   }
 
   void _callback(Interfaces interface, Events event, dynamic data) {
+    TelegramLogger.sendLog("Zebra 123 |  Scan Detected");
     if (event == Events.readRfid && data is List<RfidTag>) {
       setState(() {
         _lastScan = data.isNotEmpty ? data.first.epc : 'No scan yet';
@@ -126,13 +130,6 @@ class _Zebra123ScreenState extends State<Zebra123Screen> {
                   style: TextStyle(color: Colors.white),
                 ),
               ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              "Last Scan: $_lastScan",
-              style: TextStyle(color: Colors.white, fontSize: 16),
             ),
           ),
         ],

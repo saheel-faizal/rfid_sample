@@ -15,14 +15,9 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        // ChangeNotifierProvider(create: (_) => BaseProvider()),
-      ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: Zebra123Screen(),
-      ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Zebra123Screen(),
     );
   }
 }
