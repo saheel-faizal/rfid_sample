@@ -26,13 +26,13 @@ class BaseProvider extends ChangeNotifier {
     TelegramLogger.sendLog(
         "processEpcData: Scanned EPC HEX Before parsing: $scannedHexEpc");
 
-    String scannedEpc = hexToAscii(scannedHexEpc);
+    // String scannedEpc = hexToAscii(scannedHexEpc);
 
-    TelegramLogger.sendLog("processEpcData: Scanned EPC: $scannedEpc");
+    TelegramLogger.sendLog("processEpcData: Scanned EPC: $scannedHexEpc");
 
     // Ensure the scanned EPC is **exactly 24 characters**
-    if (scannedEpc.length != 24) {
-      TelegramLogger.sendLog("Invalid EPC length: ${scannedEpc.length}");
+    if (scannedHexEpc.length != 24) {
+      TelegramLogger.sendLog("Invalid EPC length: ${scannedHexEpc.length}");
       _showModernDialog(context, false, "Invalid EPC",
           "This EPC is not 24 characters long.");
       return;
@@ -41,7 +41,7 @@ class BaseProvider extends ChangeNotifier {
     // Expected EPC format: **24 characters** e.g., "F12025B00007C23500000000"
     RegExp epcPattern = RegExp(r'F12025B(\d{5})C(\d{1,10})');
 
-    Match? match = epcPattern.firstMatch(scannedEpc);
+    Match? match = epcPattern.firstMatch(scannedHexEpc);
 
     if (match != null) {
       String ticketId = "T-${match.group(1)}"; // Extract and format ticket number
@@ -54,7 +54,7 @@ class BaseProvider extends ChangeNotifier {
       bool isAllowed = allowedValues.contains(gateUserType);
 
       TelegramLogger.sendLog(
-          "EPC valid: $scannedEpc  | Ticket Number: $ticketId | Allowed Values: $valuesString");
+          "EPC valid: $scannedHexEpc  | Ticket Number: $ticketId | Allowed Values: $valuesString");
 
       _showModernDialog(
         context,
