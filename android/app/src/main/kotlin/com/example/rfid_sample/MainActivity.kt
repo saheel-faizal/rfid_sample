@@ -1,5 +1,6 @@
 package com.zebra.demo
 
+import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -7,6 +8,8 @@ import android.content.IntentFilter
 import android.nfc.NfcAdapter
 import android.os.Build
 import android.os.Bundle
+import com.example.rfid_sample.reader_connection.ScanPair
+import com.example.rfid_sample.rfid.RFIDController
 import com.zebra.rfid.api3.ReaderDevice
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.plugin.common.MethodChannel
@@ -16,6 +19,7 @@ class MainActivity : FlutterActivity() {
     private var methodChannel: MethodChannel? = null
     private var mNfcAdapter: NfcAdapter? = null
     private var scanResultBroadcast: BroadcastReceiver? = null
+    private var scanPair: ScanPair? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,7 +101,7 @@ class MainActivity : FlutterActivity() {
      * Pair an RFID device.
      */
     private fun pairDevice(deviceName: String) {
-        Application.scanPair.barcodeDeviceNameConnect(deviceName)
+        scanPair?.barcodeDeviceNameConnect(deviceName)
         sendDataToFlutter("pairingStatus", "Device $deviceName paired successfully")
     }
 
@@ -105,7 +109,7 @@ class MainActivity : FlutterActivity() {
      * Unpair a connected RFID device.
      */
     private fun unpairDevice(deviceName: String) {
-        Application.scanPair.unpair(deviceName)
+        scanPair?.unpair(deviceName)
         sendDataToFlutter("unpairStatus", "Device $deviceName unpaired successfully")
     }
 
