@@ -84,7 +84,7 @@ class BaseProvider extends ChangeNotifier {
     return buffer.toString();
   }
 
-  Set<String> scannedEpcSet = {}; // Store unique scanned EPCs
+  // Set<String> scannedEpcSet = {}; // Store unique scanned EPCs
   void initRFIDReader(BuildContext context) {
     double minDistanceThreshold = 10.0; // Set your desired minimum threshold
 
@@ -98,13 +98,13 @@ class BaseProvider extends ChangeNotifier {
           TelegramLogger.sendLog("Scan Detected: ${firstScan.toMap()}");
 
           // Check if EPC has already been processed
-          if (scannedEpcSet.contains(scannedEpc)) {
-            TelegramLogger.sendLog("Duplicate EPC detected, ignoring: $scannedEpc");
-            return; // Skip processing if already scanned
-          }
+          // if (scannedEpcSet.contains(scannedEpc)) {
+          //   TelegramLogger.sendLog("Duplicate EPC detected, ignoring: $scannedEpc");
+          //   return; // Skip processing if already scanned
+          // }
 
           // Add EPC to the set to mark it as processed
-          scannedEpcSet.add(scannedEpc);
+          // scannedEpcSet.add(scannedEpc);
 
           if (relativeDistance <= minDistanceThreshold) {
             _isScannerActive = false; // Stop scanning after first scan
@@ -126,7 +126,6 @@ class BaseProvider extends ChangeNotifier {
       },
       connectionStatusCallback: (status) {
         TelegramLogger.sendLog("RFID ConnectionStatus: ${status.name}");
-        print(status.name);
       },
     ));
   }
@@ -147,8 +146,7 @@ class BaseProvider extends ChangeNotifier {
     _isScannerActive = false;
     notifyListeners();
     TelegramLogger.sendLog("RFID Scanning Stopped");
-    await ZebraRfidSdkPlugin.disconnect();
-    // await ZebraRfidSdkPlugin.dispose();
+    ZebraRfidSdkPlugin.disconnect();
 
   }
 
