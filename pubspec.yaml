@@ -36,13 +36,17 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_blue_plus:
   permission_handler:
-  zebra_rfid_sdk_plugin: ^0.0.3
   provider:
   mobile_scanner:
   lottie:
   qr_flutter:
   fluttertoast:
   dio:
+  restart_app: ^1.3.2
+  zebra_rfid_sdk_plugin:
+    git:
+      url: https://github.com/saheel-faizal/Zebra-Rfid-Sdk-Plugin.git
+      ref: rfid-sol
 
 #  pda_rfid_scanner:
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:restart_app/restart_app.dart';
 import 'package:rfid_sample/service/telegram_logger_service.dart';
 import 'package:rfid_sample/utils/app_alerts.dart';
 import 'package:zebra_rfid_sdk_plugin/zebra_event_handler.dart';
@@ -26,15 +27,13 @@ class BaseProvider extends ChangeNotifier {
     TelegramLogger.sendLog(
         "processEpcData: Scanned EPC HEX Before parsing: $scannedHexEpc");
 
-    // String scannedEpc = hexToAscii(scannedHexEpc);
-
     TelegramLogger.sendLog("processEpcData: Scanned EPC: $scannedHexEpc");
 
     // Ensure the scanned EPC is **exactly 24 characters**
     if (scannedHexEpc.length != 24) {
       TelegramLogger.sendLog("Invalid EPC length: ${scannedHexEpc.length}");
-      _showModernDialog(context, false, "Invalid EPC",
-          "This EPC is not 24 characters long.");
+      _showModernDialog(
+          context, false, "Invalid EPC", "This EPC is not 24 characters long.");
       return;
     }
 
@@ -44,11 +43,13 @@ class BaseProvider extends ChangeNotifier {
     Match? match = epcPattern.firstMatch(scannedHexEpc);
 
     if (match != null) {
-      String ticketId = "T-${match.group(1)}"; // Extract and format ticket number
+      String ticketId =
+          "T-${match.group(1)}"; // Extract and format ticket number
       String valuesString = match.group(2) ?? ""; // Extract values
 
       // Convert the extracted values into a list of allowed values
-      List<String> allowedValues = valuesString.split(''); // Split into single digits
+      List<String> allowedValues =
+          valuesString.split(''); // Split into single digits
 
       // Check if the gate user type (assumed to be a single digit) is allowed
       bool isAllowed = allowedValues.contains(gateUserType);
@@ -71,19 +72,6 @@ class BaseProvider extends ChangeNotifier {
     }
   }
 
-
-
-
-  String hexToAscii(String hex) {
-    TelegramLogger.sendLog("hexToAscii: $hex");
-    final buffer = StringBuffer();
-    for (int i = 0; i < hex.length; i += 2) {
-      final part = hex.substring(i, i + 2);
-      buffer.write(String.fromCharCode(int.parse(part, radix: 16)));
-    }
-    return buffer.toString();
-  }
-
   // Set<String> scannedEpcSet = {}; // Store unique scanned EPCs
   void initRFIDReader(BuildContext context) {
     double minDistanceThreshold = 10.0; // Set your desired minimum threshold
@@ -92,7 +80,8 @@ class BaseProvider extends ChangeNotifier {
       readRfidCallback: (datas) async {
         if (datas.isNotEmpty) {
           var firstScan = datas.first; // Get the first detected tag
-          double? relativeDistance = firstScan.relativeDistance.toDouble(); // Get relative distance if available
+          double? relativeDistance = firstScan.relativeDistance
+              .toDouble(); // Get relative distance if available
           String scannedEpc = firstScan.tagID; // Extract EPC
 
           TelegramLogger.sendLog("Scan Detected: ${firstScan.toMap()}");
@@ -110,7 +99,8 @@ class BaseProvider extends ChangeNotifier {
             _isScannerActive = false; // Stop scanning after first scan
             await stopRfidScanning(); // Stop scanner
             AppAlerts.appToast(message: "Scanned EPC: $scannedEpc");
-            TelegramLogger.sendLog("Scanned EPC: $scannedEpc | Passed Distance Check");
+            TelegramLogger.sendLog(
+                "Scanned EPC: $scannedEpc | Passed Distance Check");
 
             // Call reusable function to validate EPC
             processEpcData(context, scannedEpc, gateUserType);
@@ -133,21 +123,24 @@ class BaseProvider extends ChangeNotifier {
   /// **Start Scanning for RFID Tags**
   Future<void> startRfidScanning(BuildContext context) async {
     if (_isScannerActive) return;
-    initRFIDReader(context);
+    _isScannerActive = true;
+    notifyListeners();
     TelegramLogger.sendLog("RFID Scanning Started");
     scannedTag = ""; // Reset previous scan
     await ZebraRfidSdkPlugin.connect();
-    _isScannerActive = true;
-    notifyListeners();
+
   }
 
   /// **Stop Scanning**
   Future<void> stopRfidScanning() async {
-    _isScannerActive = false;
-    notifyListeners();
-    TelegramLogger.sendLog("RFID Scanning Stopped");
-    ZebraRfidSdkPlugin.disconnect();
-
+    try {
+      _isScannerActive = false;
+      notifyListeners();
+      TelegramLogger.sendLog("RFID Scanning Stopped");
+      await ZebraRfidSdkPlugin.disconnect();
+    } catch (e) {
+      TelegramLogger.sendLog("ERROR stopRfidScanning");
+    }
   }
 
   void _showModernDialog(

@@ -17,8 +17,8 @@ class GateUserHomeScreen extends StatefulWidget {
 class _GateUserHomeScreenState extends State<GateUserHomeScreen> {
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((callback) {
-      // final baseProvider = Provider.of<BaseProvider>(context, listen: false);
+    WidgetsBinding.instance.addPostFrameCallback((callback){
+      Provider.of<BaseProvider>(context,listen: false).initRFIDReader(context);
     });
     super.initState();
   }
