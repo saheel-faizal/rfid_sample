@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
@@ -17,8 +16,8 @@ class GateUserHomeScreen extends StatefulWidget {
 class _GateUserHomeScreenState extends State<GateUserHomeScreen> {
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((callback){
-      Provider.of<BaseProvider>(context,listen: false).initRFIDReader(context);
+    WidgetsBinding.instance.addPostFrameCallback((callback) {
+      Provider.of<BaseProvider>(context, listen: false).initRFIDReader(context);
     });
     super.initState();
   }
@@ -38,11 +37,14 @@ class _GateUserHomeScreenState extends State<GateUserHomeScreen> {
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            if (provider.connectionStatus.isNotEmpty)
+              Text("Connection Status : ${provider.connectionStatus}"),
+
             // **Show scanning animation if scanner is ON**
             Visibility(
               visible: provider.isScannerActive,
               replacement:
-              Consumer<BaseProvider>(builder: (_, provider, child) {
+                  Consumer<BaseProvider>(builder: (_, provider, child) {
                 return Center(
                   child: InkWell(
                     onTap: () async {

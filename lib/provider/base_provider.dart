@@ -18,6 +18,7 @@ class BaseProvider extends ChangeNotifier {
   bool _scanCooldown = false; // Prevent multiple quick scans
 
   String scannedTag = "";
+  String connectionStatus = "";
 
   bool get isScannerActive => _isScannerActive;
 
@@ -115,6 +116,8 @@ class BaseProvider extends ChangeNotifier {
         TelegramLogger.sendLog("RFID ERROR: ${err.errorMessage}");
       },
       connectionStatusCallback: (status) {
+        connectionStatus = status.name;
+        notifyListeners();
         TelegramLogger.sendLog("RFID ConnectionStatus: ${status.name}");
       },
     ));
@@ -128,7 +131,6 @@ class BaseProvider extends ChangeNotifier {
     TelegramLogger.sendLog("RFID Scanning Started");
     scannedTag = ""; // Reset previous scan
     await ZebraRfidSdkPlugin.connect();
-
   }
 
   /// **Stop Scanning**
