@@ -19,7 +19,7 @@ class _GateUserHomeScreenState extends State<GateUserHomeScreen> {
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((callback) {
       final baseProvider = Provider.of<BaseProvider>(context, listen: false);
-      // baseProvider.initRFIDReader(context);
+      baseProvider.initRFIDReader(context);
     });
     super.initState();
   }

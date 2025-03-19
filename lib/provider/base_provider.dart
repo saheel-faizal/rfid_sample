@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:rfid_sample/service/telegram_logger_service.dart';
 import 'package:rfid_sample/utils/app_alerts.dart';
+import 'package:zebra_rfid_reader_sdk/zebra_rfid_reader_sdk.dart';
 
 import '../utils/config.dart';
 
@@ -76,14 +80,57 @@ class BaseProvider extends ChangeNotifier {
     return buffer.toString();
   }
 
-  Set<String> scannedEpcSet = {}; // Store unique scanned EPCs
-  void initRFIDReader(BuildContext context) {}
+  final _zebraRfidReaderSdkPlugin = ZebraRfidReaderSdk();
+
+  /// **Initialize RFID Reader**
+  void initRFIDReader(BuildContext context) async {
+    await requestAccess(); // Request Bluetooth permissions
+    List<ReaderDevice> availableDevices =
+        await _zebraRfidReaderSdkPlugin.getAvailableReaderList();
+
+    if (availableDevices.isNotEmpty) {
+      String tagName = availableDevices.first.name ??
+          ""; // Select the first available device
+      TelegramLogger.sendLog(
+          "Available device found : ${availableDevices.first.name}");
+
+      await _zebraRfidReaderSdkPlugin.connect(
+        tagName,
+        readerConfig: ReaderConfig(
+          antennaPower: 200, // Set max antenna power
+          beeperVolume: BeeperVolume.medium,
+          isDynamicPowerEnable: true,
+        ),
+      );
+
+      _zebraRfidReaderSdkPlugin.connectedReaderDevice.listen((event) {
+        final result = jsonDecode(event.toString());
+        TelegramLogger.sendLog("Connected to RFID Reader: ${result.toString()}");
+
+      });
+    } else {
+      TelegramLogger.sendLog("No available RFID readers found.");
+    }
+  }
+
+  /// **Request Bluetooth Scan and Connection Permissions**
+  Future<void> requestAccess() async {
+    await Permission.bluetoothScan.request();
+    await Permission.bluetoothConnect.request();
+  }
+
 
   /// **Start Scanning for RFID Tags**
   Future<void> startRfidScanning(BuildContext context) async {
     if (_isScannerActive) return;
-    initRFIDReader(context);
     TelegramLogger.sendLog("RFID Scanning Started");
+    _zebraRfidReaderSdkPlugin.setAntennaPower(120);
+    _zebraRfidReaderSdkPlugin.readTags.listen((onData){
+      final result = jsonDecode(onData.toString());
+      final readTag = TagDataModel.fromJson(result);
+      TelegramLogger.sendLog("ONDATA FOUND : $onData");
+      processEpcData(context, readTag.tagId, gateUserType);
+    });
     scannedTag = ""; // Reset previous scan
     _isScannerActive = true;
     notifyListeners();
@@ -92,8 +139,40 @@ class BaseProvider extends ChangeNotifier {
   /// **Stop Scanning**
   Future<void> stopRfidScanning() async {
     _isScannerActive = false;
+    _zebraRfidReaderSdkPlugin.stopFindingTheTag();
+    TelegramLogger.sendLog("Stopped Finding Tag");
+    _zebraRfidReaderSdkPlugin.disconnect(); // Disconnect from RFID reader
+    TelegramLogger.sendLog("Disconnected Scanner");
     notifyListeners();
     TelegramLogger.sendLog("RFID Scanning Stopped");
+  }
+
+  /// **Set Antenna Power**
+  void setAntennaPower(int value) {
+    if (value >= 120 && value <= 300) {
+      _zebraRfidReaderSdkPlugin.setAntennaPower(value);
+      debugPrint("Antenna Power set to $value");
+    } else {
+      debugPrint("Invalid Antenna Power value. Must be between 120 and 300.");
+    }
+  }
+
+  /// **Set Beeper Volume**
+  void setBeeperVolume(int volume) {
+    _zebraRfidReaderSdkPlugin.setBeeperVolume(volume);
+    debugPrint("Beeper Volume set to $volume");
+  }
+
+  /// **Enable/Disable Dynamic Power**
+  void setDynamicPower(bool enable) {
+    _zebraRfidReaderSdkPlugin.setDynamicPower(enable);
+    debugPrint("Dynamic Power set to $enable");
+  }
+
+  /// **Find Specific RFID Tag**
+  void findTag(String tagPattern) {
+    _zebraRfidReaderSdkPlugin.findTheTag(tagPattern);
+    debugPrint("Searching for tag: $tagPattern");
   }
 
   void _showModernDialog(
